@@ -18,17 +18,15 @@ public:
     Token next_token();
 
 private:
-    static constexpr std::string_view                                   alphabet_ = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 \t\n\r,;(){}:+-*/=!<>|&";    // 合法字符集
-    const static std::unordered_map<int, std::unordered_map<char, int>> DFAtran_;                                                                                                // DFA 状态转移表
+    unsigned char status_ = 1;          // 当前状态
+    std::string   source_;              // 完整的源代码
+    size_t        lexeme_begin_ = 0;    // 当前 lexeme 的起始位置
+    size_t        lexeme_end_   = 0;    // 当前 lexeme 的结束位置
+    uint          line_         = 1;    // 当前所在行号
 
-    int         status_ = 0;                                                                                                                                                     // 当前状态
-    std::string source_;                                                                                                                                                         // 完整的源代码
-    size_t      lexeme_begin_ = 0;                                                                                                                                               // 当前 lexeme 的起始位置
-    size_t      lexeme_end_   = 0;                                                                                                                                               // 当前 lexeme 的结束位置
-    int         line_         = 1;                                                                                                                                               // 当前所在行号
-
-    // 获取下一个字符
-    char next_char();
+    // 获取 lexeme_end_ 处的字符
+    // 并将 lexeme_end_ 后移一位
+    char next_position();
 
     // 将 lexeme_end_ 前移一位
     void prev_position();
@@ -36,10 +34,6 @@ private:
     // 获取当前 lexeme 的字符串
     [[nodiscard]]
     std::string get_lexeme() const;
-
-    // 判断字符是否在合法的字符集内
-    [[nodiscard]]
-    static bool is_valid_char(char c);
 
     // 判断是否到达文件末尾
     [[nodiscard]]

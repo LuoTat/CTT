@@ -18,20 +18,23 @@ enum class TokenType
     // 字面量
     INT_LITERAL,
     // 运算符
-    ADD,       // +
-    SUB,       // -
-    MUL,       // *
-    DIV,       // /
-    EQ,        // ==
-    NEQ,       // !=
-    LT,        // <
-    GT,        // >
-    LE,        // <=
-    GE,        // >=
-    AND,       // &&
-    OR,        // ||
-    NOT,       // !
-    ASSIGN,    // =
+    ADD,            // +
+    SUB,            // -
+    MUL,            // *
+    DIV,            // /
+    EQ,             // ==
+    NEQ,            // !=
+    LT,             // <
+    GT,             // >
+    LE,             // <=
+    GE,             // >=
+    AND,            // &&
+    OR,             // ||
+    NOT,            // !
+    BITWISE_AND,    // &
+    BITWISE_OR,     // |
+    BITWISE_NOT,    // ~
+    ASSIGN,         // =
     // 分隔符
     COMMA,        // ,
     SEMICOLON,    // ;
@@ -72,6 +75,9 @@ inline std::string token_type_to_string(TokenType type)
         case TokenType::AND         : return "AND";
         case TokenType::OR          : return "OR";
         case TokenType::NOT         : return "NOT";
+        case TokenType::BITWISE_AND : return "BITWISE_AND";
+        case TokenType::BITWISE_OR  : return "BITWISE_OR";
+        case TokenType::BITWISE_NOT : return "BITWISE_NOT";
         case TokenType::ASSIGN      : return "ASSIGN";
         case TokenType::COMMA       : return "COMMA";
         case TokenType::SEMICOLON   : return "SEMICOLON";
@@ -92,10 +98,10 @@ class Token
 public:
     TokenType   type;      // 词法单元类型
     std::string lexeme;    // 原始字符串
-    int         line;      // 所在行号
+    uint        line;      // 所在行号
 
     template <std::convertible_to<std::string> T>
-    explicit Token(TokenType type, T&& lexeme, int line):
+    explicit Token(TokenType type, T&& lexeme, uint line):
         type(type), lexeme(std::forward<T>(lexeme)), line(line)
     {}
 

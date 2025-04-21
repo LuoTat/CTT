@@ -27,3 +27,5 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif ()
 
 add_executable(Main main.cxx token.cxx lexer.cxx)
+
+add_executable(DFAtran dfa_tran.cxx)
