@@ -1,5 +1,5 @@
 # 设置 CMake 的最低版本
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.31)
 
 # 设置工程名称和版本
 project(CTT VERSION 1.0.0 LANGUAGES CXX)

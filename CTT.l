@@ -1,24 +1,47 @@
 # 词法分析
-# 使用正则文法定义
 
-      DELIM -> ' ' | \t | \r | \n
-         WS -> (DELIM)+
-      DIGIT -> [0-9]
-     DIGITS -> (digit)+
-     LETTER -> [A-Za-z]
-         ID -> letter(letter|digit)*
-INT_LITERAL -> digits
-       FUNC -> func
-        VAR -> var
-         IF -> if
-       GOTO -> goto
-     RETURN -> return
-       TYPE -> int | bool
-      COMMA -> ,
-  SEMICOLON -> ;
-     LPAREN -> (
-     RPAREN -> )
-     LBRACE -> {
-     RBRACE -> }
-      COLON -> :
-         OP -> + | - | * | / | == | != | < | > | <= | >= | || | && | ! | =
+/* 正则定义 */
+
+delim             [ \t\r\n]
+ws                {delim}+
+digit             [0-9]
+letter            [A-Za-z]
+id                {letter}({letter}|{digit})*
+int_literal       {digit}+
+
+%%
+"func"            {return FUNC}
+"var"             {return VAR}
+"if"              {return IF}
+"goto"            {return GOTO}
+"return"          {return RETURN}
+"int"             {return INT}
+"bool"            {return BOOL}
+{id}              {return ID}
+{int_literal}     {return INT_LITERAL}
+"+"               {return ADD}
+"-"               {return SUB}
+"*"               {return MUL}
+"/"               {return DIV}
+"=="              {return EQ}
+"!="              {return NEQ}
+"<"               {return LT}
+">"               {return GT}
+"<="              {return LE}
+">="              {return GE}
+"&&"              {return AND}
+"||"              {return OR}
+"!"               {return NOT}
+"&"               {return BITWISE_AND}
+"|"               {return BITWISE_OR}
+"~"               {return BITWISE_NOT}
+"="               {return ASSIGN}
+","               {return COMMA}
+";"               {return SEMICOLON}
+"("               {return LPAREN}
+")"               {return RPAREN}
+"{"               {return LBRACE}
+"}"               {return RBRACE}
+":"               {return COLON}
+<<EOF>>           {return END_OF_FILE}
+.                 {return ERROR}

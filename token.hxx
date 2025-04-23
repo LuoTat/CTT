@@ -5,19 +5,15 @@
 // 词法单元类型
 enum class TokenType
 {
-    // 关键字
-    FUNC,      // func
-    VAR,       // var
-    IF,        // if
-    GOTO,      // goto
-    RETURN,    // return
-    INT,       // int
-    BOOL,      // bool
-    // 标识符
-    ID,
-    // 字面量
-    INT_LITERAL,
-    // 运算符
+    FUNC,           // func
+    VAR,            // var
+    IF,             // if
+    GOTO,           // goto
+    RETURN,         // return
+    INT,            // int
+    BOOL,           // bool
+    ID,             // 标识符
+    INT_LITERAL,    // INT型字面量
     ADD,            // +
     SUB,            // -
     MUL,            // *
@@ -35,18 +31,15 @@ enum class TokenType
     BITWISE_OR,     // |
     BITWISE_NOT,    // ~
     ASSIGN,         // =
-    // 分隔符
-    COMMA,        // ,
-    SEMICOLON,    // ;
-    LPAREN,       // (
-    RPAREN,       // )
-    LBRACE,       // {
-    RBRACE,       // }
-    COLON,        // :
-    // 文件结束
-    END_OF_FILE,
-    // 错误或未知
-    ERROR
+    COMMA,          // ,
+    SEMICOLON,      // ;
+    LPAREN,         // (
+    RPAREN,         // )
+    LBRACE,         // {
+    RBRACE,         // }
+    COLON,          // :
+    END_OF_FILE,    // EOF
+    ERROR           // ERROR
 };
 
 inline std::string token_type_to_string(TokenType type)

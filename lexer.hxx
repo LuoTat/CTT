@@ -1,6 +1,5 @@
 #pragma once
 
-#include <unordered_map>
 #include "token.hxx"
 
 // 词法分析器类

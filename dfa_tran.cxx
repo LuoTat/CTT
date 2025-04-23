@@ -1,3 +1,4 @@
+#include <format>
 #include <iostream>
 #include <ranges>
 #include <unordered_map>
@@ -7,11 +8,9 @@
 
 using namespace std;
 
-string all_alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-string all_digit = "0123456789";
-string all_alnum = all_alpha + all_digit;
-
-string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 \t\n\r+-*/=!<>&|,;(){}:";
+constexpr std::string_view all_alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+constexpr std::string_view all_digit = "0123456789";
+constexpr std::string_view all_alnum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 struct NFA_Node
 {
@@ -236,6 +235,42 @@ int main()
         {'\r', 93}};
     nodes[93].isFinal = true;
 
+    // 按照优先级把每一个终止状态和词法单元名对应
+    vector<pair<int, string>> final_states = {
+        {5, "FUNC"},
+        {9, "VAR"},
+        {12, "IF"},
+        {17, "GOTO"},
+        {24, "RETURN"},
+        {28, "INT"},
+        {33, "BOOL"},
+        {35, "ID"},
+        {37, "INT_LITERAL"},
+        {39, "ADD"},
+        {41, "SUB"},
+        {43, "MUL"},
+        {45, "DIV"},
+        {48, "EQ"},
+        {51, "NEQ"},
+        {53, "LT"},
+        {55, "GT"},
+        {58, "LE"},
+        {61, "GE"},
+        {64, "AND"},
+        {67, "OR"},
+        {69, "NOT"},
+        {71, "BITWISE_AND"},
+        {73, "BITWISE_OR"},
+        {75, "BITWISE_NOT"},
+        {77, "ASSIGN"},
+        {79, "COMMA"},
+        {81, "SEMICOLON"},
+        {83, "LPAREN"},
+        {85, "RPAREN"},
+        {87, "LBRACE"},
+        {89, "RBRACE"},
+        {91, "COLON"},
+        {93, "WS"}};
 
     // 使用子集构造法生成 DFA 的状态转移表
     // 1. 初始化状态集合
@@ -289,17 +324,70 @@ int main()
     // 把 DFAset[1] 和 DFAset[0] 交换一下
     swap(DFAset[1], DFAset[0]);
 
-    for (size_t i = 0; i < DFAset.size(); ++i)
+    // 下面是输出每一个 DFA_Status 的子集
+    // 同时按照优先级找出 DFA 的终止状态并标记词法单元名称
+
+    // 这个用来记录每一个终止状态对应的 DFA 的状态
+    // 用来生成 get_token_type() 函数
+    unordered_map<string, vector<int>> DFA_final_states;
+
+    cout << "// 0 -> [] (DEAD)" << endl;
+    cout << "// 1 -> [";
+    for (int a : DFAset[1].indexs | views::take(DFAset[1].indexs.size() - 1))
     {
-        cout << "// ";
-        cout << i << " -> ";
-        cout << '[';
-        for (int a : DFAset[i].indexs)
-        {
-            cout << a << ',';
-        }
-        cout << "]" << endl;
+        cout << format("{},", a);
     }
+    cout << format("{}] (START)", *DFAset[1].indexs.rbegin()) << endl;
+
+
+    for (size_t i = 2; i < DFAset.size(); ++i)
+    {
+        cout << format("// {} -> [", i);
+        for (int a : DFAset[i].indexs | views::take(DFAset[i].indexs.size() - 1))
+        {
+            cout << format("{},", a);
+        }
+        cout << format("{}]", *DFAset[i].indexs.rbegin());
+
+        // 寻找终止状态
+        for (auto& [k, v] : final_states)
+        {
+            if (DFAset[i].indexs.contains(k))
+            {
+                cout << format(" ({})", v);
+                DFA_final_states[v].push_back(i);
+                break;
+            }
+        }
+        cout << endl;
+    }
+
+    // 生成 get_token_type 函数
+    cout << R"(
+TokenType Lexer::get_token_type() const
+{
+    switch (status_)
+    {
+)";
+    for (auto& v : final_states | views::values)
+    {
+        if (v == "WS")
+            continue;
+
+        cout << "\t\t";
+        vector<int> status = DFA_final_states[v];
+        for (int a : status)
+        {
+            cout << format("case {} :", a);
+        }
+        cout << format("return TokenType::{};", v) << endl;
+    }
+    cout << "\t\t";
+    cout << R"(default : return TokenType::ERROR;
+    }
+}
+)" << endl;
+
 
     // 将每一个 DFA_Status 映射到 int
     unordered_map<DFA_Status, int, DFA_StatusHash> status_map;
@@ -318,6 +406,7 @@ int main()
             DFAtran_index[index][c] = status_map[s];
         }
     }
+
     // 输出 DFAtran_index 的二维数组的形式
     cout << "char DFAtran[54][128] = {" << endl;
 
@@ -326,7 +415,7 @@ int main()
         cout << "{";
         for (int j = 0; j < 127; ++j)
         {
-            cout << DFAtran_index[i][j] << ",";
+            cout << format("{},", DFAtran_index[i][j]);
         }
         cout << DFAtran_index[i][127];
         cout << "}," << endl;

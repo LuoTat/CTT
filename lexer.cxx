@@ -125,9 +125,7 @@ S:
     // 如果已经读到文件结尾
     // 则返回一个文件结束的 Token
     if (at_eof())
-    {
         return Token(TokenType::END_OF_FILE, "", line_);
-    }
 
     std::stack<unsigned char> status_stack;
     status_stack.push(status_);
@@ -163,12 +161,11 @@ S:
                 goto S;
             }
 
-            TokenType   token_type = get_token_type();
-            std::string lexeme     = source_.substr(lexeme_begin_, lexeme_end_ - lexeme_begin_);
+            Token token = Token(get_token_type(), get_lexeme(), line_);
 
             // 恢复 DFA 的初始状态
             reset();
-            return Token(token_type, lexeme, line_);
+            return token;
         }
 
         // 如果当前状态不是终止状态
@@ -181,12 +178,13 @@ S:
     // 则返回一个错误 Token
     // 使用恐慌模式处理错误
     // 直接跳过当前字符
+
     ++lexeme_end_;
-    std::string lexeme = get_lexeme();
+    Token token = Token(TokenType::ERROR, get_lexeme(), line_);
 
     // 恢复 DFA 的初始状态
     reset();
-    return Token(TokenType::ERROR, lexeme, line_);
+    return token;
 }
 
 char Lexer::next_position()
@@ -256,8 +254,7 @@ TokenType Lexer::get_token_type() const
         case 44 :
         case 46 :
         case 51 :
-        case 52 :
-            return TokenType::ID;
+        case 52 : return TokenType::ID;
         case 12 : return TokenType::INT_LITERAL;
         case 8  : return TokenType::ADD;
         case 10 : return TokenType::SUB;
